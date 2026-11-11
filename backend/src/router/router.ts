@@ -50,6 +50,9 @@ router.get('/health', healthController);
  *               - email
  *               - password
  *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: Xavi Lorenzo
  *               email:
  *                 type: string
  *                 example: estudiante@gmail.com
