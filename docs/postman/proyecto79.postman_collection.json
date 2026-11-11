@@ -1,0 +1,262 @@
+{
+    "_comment": "docs/postman/proyecto79.postman_collection.json",
+    "info": {
+        "_postman_id": "a79-xenry-collection-2026",
+        "name": "Proyecto 79 - Plataforma de Retos API",
+        "description": "Colección oficial para validar Autenticación (US-01, US-02), Catálogo/Detalle (US-03, US-04) y Evaluación con Judge0 (US-06, US-07, US-08).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "prodUrl",
+            "value": "https://proyecto79-1.onrender.com",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "1. Healthcheck",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/health",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "2. Registro de Usuario (US-01)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "const res = pm.response.json();",
+                            "if (res.token) { pm.collectionVariables.set('token', res.token); }"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"xavi.prueba@henry.com\",\n  \"password\": \"Password123\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/usuario/register",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "usuario",
+                        "register"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "3. Login de Usuario (US-02)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "const res = pm.response.json();",
+                            "if (res.token) { pm.collectionVariables.set('token', res.token); }"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"xavi.prueba@henry.com\",\n  \"password\": \"Password123\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/usuario/login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "usuario",
+                        "login"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "4. Catálogo de Retos (US-03)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/retos",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "retos"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "5. Detalle de Reto - MeLi (US-04)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/retos/detalle/meli-envio",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "retos",
+                        "detalle",
+                        "meli-envio"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "6. Ejecutar Reto - Solución APROBADA (US-07)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"challengeId\": \"meli-envio\",\n  \"language\": \"typescript\",\n  \"code\": \"import * as fs from \\\"fs\\\";\\nconst [carrito, minimo] = fs.readFileSync(0, \\\"utf8\\\").trim().split(/\\\\s+/).map(Number);\\nconsole.log(Math.max(0, minimo - carrito));\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/retos/ejecutar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "retos",
+                        "ejecutar"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "7. Ejecutar Reto - Solución FALLÓ (US-07)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"challengeId\": \"meli-envio\",\n  \"language\": \"typescript\",\n  \"code\": \"console.log(999999);\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/retos/ejecutar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "retos",
+                        "ejecutar"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "8. Ejecutar Reto - ERROR DE SINTAXIS (US-07)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"challengeId\": \"meli-envio\",\n  \"language\": \"typescript\",\n  \"code\": \"const x: number = ; console.log(x\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/retos/ejecutar",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "retos",
+                        "ejecutar"
+                    ]
+                }
+            }
+        }
+    ]
+}
