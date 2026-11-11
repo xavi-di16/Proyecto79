@@ -7,26 +7,36 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secreto_desarrollo_proyecto79';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, nombre, name } = req.body;
+    const nombreFinal = nombre || name;
 
     const existingUser = await UsuarioService.findByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ msg: 'El correo electrónico ya está registrado' });
+      return res
+        .status(400)
+        .json({ msg: 'El correo electrónico ya está registrado' });
     }
 
-    const nuevoUsuario = await UsuarioService.registrar(email, password);
-
-    const token = jwt.sign(
-      { id: nuevoUsuario.id, email: nuevoUsuario.email },
-      JWT_SECRET,
-      { expiresIn: '24h' }
+    const nuevoUsuario = await UsuarioService.registrar(
+      email,
+      password,
+      nombreFinal
     );
+
+    const userPayload = {
+      id: nuevoUsuario.id,
+      nombre: nuevoUsuario.nombre,
+      name: nuevoUsuario.name,
+      email: nuevoUsuario.email
+    };
+
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '24h' });
 
     return res.status(201).json({
       msg: 'Usuario creado correctamente',
       token,
-      user: { id: nuevoUsuario.id, email: nuevoUsuario.email },
-      data: { id: nuevoUsuario.id, email: nuevoUsuario.email }
+      user: userPayload,
+      data: userPayload
     });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
@@ -43,20 +53,25 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ msg: 'Credenciales inválidas' });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const userPayload = {
+      id: user.id,
+      nombre: user.nombre,
+      name: user.name,
+      email: user.email
+    };
+
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '24h' });
 
     return res.status(200).json({
       msg: 'Login exitoso',
       token,
-      user: { id: user.id, email: user.email }
+      user: userPayload
     });
   } catch (error) {
     console.error('Error en el login:', error);
-    return res.status(500).json({ msg: 'Error interno en el inicio de sesión' });
+    return res
+      .status(500)
+      .json({ msg: 'Error interno en el inicio de sesión' });
   }
 };
 
@@ -65,7 +80,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
     const users = await UsuarioService.obtenerTodos();
     return res.status(200).json({
       msg: 'Usuarios obtenidos correctamente',
-      data: users.map((user: any) => ({ id: user.id, email: user.email }))
+      data: users.map((user: any) => ({
+        id: user.id,
+        nombre: user.nombre,
+        name: user.name,
+        email: user.email
+      }))
     });
   } catch (error) {
     console.error('Error al obtener los usuarios:', error);
@@ -77,7 +97,9 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ msg: 'El correo y la nueva contraseña son obligatorios' });
+      return res
+        .status(400)
+        .json({ msg: 'El correo y la nueva contraseña son obligatorios' });
     }
 
     const updatedUser = await UsuarioService.updatePassword(email, password);
@@ -87,7 +109,12 @@ export const updateUser = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       msg: 'Contraseña actualizada correctamente',
-      data: { id: updatedUser.id, email: updatedUser.email }
+      data: {
+        id: updatedUser.id,
+        nombre: updatedUser.nombre,
+        name: updatedUser.name,
+        email: updatedUser.email
+      }
     });
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
