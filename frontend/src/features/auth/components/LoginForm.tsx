@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
+import { AuthIcon } from './AuthIcon'
 
 type Errors = { email?: string; password?: string }
 
@@ -37,9 +38,7 @@ export function LoginForm({ recoveryLink }: { recoveryLink: ReactNode }) {
       <div className="field">
         <label htmlFor="email">Correo electrónico</label>
         <div className="input-control">
-          <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" />
-          </svg>
+          <AuthIcon className="input-icon" name="mail" />
         <input ref={emailRef} id="email" name="email" type="email" autoComplete="username"
           placeholder="nombre@correo.com" required value={email}
           aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined}
@@ -54,9 +53,7 @@ export function LoginForm({ recoveryLink }: { recoveryLink: ReactNode }) {
       <div className="field">
         <label htmlFor="password">Contraseña</label>
         <div className="input-control password-control">
-          <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
-          </svg>
+          <AuthIcon className="input-icon" name="lock" />
           <input ref={passwordRef} id="password" name="password" type={showPassword ? 'text' : 'password'}
             autoComplete="current-password" placeholder="Ingresá tu contraseña" required value={password}
             aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'password-error' : undefined}
@@ -68,11 +65,7 @@ export function LoginForm({ recoveryLink }: { recoveryLink: ReactNode }) {
           <button type="button" className="password-toggle" aria-controls="password"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={showPassword}
             onClick={() => setShowPassword(!showPassword)}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-              <circle cx="12" cy="12" r="3" />
-              {showPassword && <path d="m3 3 18 18" />}
-            </svg>
+            <AuthIcon name={showPassword ? 'eye-off' : 'eye'} />
           </button>
         </div>
         {errors.password && <p className="field-error" id="password-error">Error: {errors.password}</p>}
@@ -80,7 +73,7 @@ export function LoginForm({ recoveryLink }: { recoveryLink: ReactNode }) {
       {recoveryLink}
       <div className="sr-only" role="alert">{errors.email || errors.password ? 'Revisá los campos indicados para continuar.' : ''}</div>
       <button className="primary-button" type="submit">Iniciar sesión
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+        <AuthIcon name="arrow" />
       </button>
       <p className="demo-notice" role="status">{notice}</p>
     </form>
