@@ -35,9 +35,20 @@ La captura de Figma muestra el catálogo, la consigna, el editor y la respuesta 
 | `src/services/api.ts` | Cliente HTTP de los tres endpoints de retos. |
 | `src/types/api.ts` | Contratos de retos, evaluación y propiedades de integración. |
 
+## Instalar y verificar esta rama
+
+Con Node.js `^20.19.0` o `>=22.12.0`, desde `frontend/`:
+
+```bash
+npm ci
+npm run typecheck
+```
+
+`package.json`, `package-lock.json` y `tsconfig.json` están versionados. Esta rama instala y verifica sus módulos, pero no contiene todavía el punto de entrada ni el comando de build de la aplicación completa. Para hacer el despliegue se deben ensamblar las rutas con el trabajo de acceso del otro frontend developer.
+
 ## Integración con el frontend de acceso
 
-Los componentes requieren React, React Router, TypeScript, `@monaco-editor/react` y `monaco-editor`. `monaco.ts` usa el manejo de workers de Vite (`?worker`). El proyecto anfitrión instala estas dependencias y define `VITE_API_URL` si la API no está en `https://proyecto79-1.onrender.com/api`.
+Las dependencias React, React Router, TypeScript, `@monaco-editor/react` y `monaco-editor` están declaradas en `package.json`. `monaco.ts` usa el manejo de workers de Vite (`?worker`). El proyecto anfitrión define `VITE_API_URL` si la API no está en `https://proyecto79-1.onrender.com/api`.
 
 En las rutas protegidas del frontend anfitrión, montar:
 
