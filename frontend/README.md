@@ -31,20 +31,24 @@ La captura de Figma muestra el catálogo, la consigna, el editor y la respuesta 
 | `src/features/catalog/CatalogPage.tsx` | Carga el catálogo y enlaza con cada reto. |
 | `src/features/workspace/ChallengePage.tsx` | Muestra consigna, editor, ejecución y cuatro estados de evaluación. |
 | `src/features/workspace/monaco.ts` | Carga Monaco y los workers locales de TypeScript. |
+| `src/features/preview.tsx` | Punto de entrada de la vista previa local, sin registro ni login. |
 | `src/features/practice.css` | Estilos limitados al contenedor `.a79-practice`, con la paleta acordada y modo oscuro según el sistema. |
 | `src/services/api.ts` | Cliente HTTP de los tres endpoints de retos. |
 | `src/types/api.ts` | Contratos de retos, evaluación y propiedades de integración. |
 
-## Instalar y verificar esta rama
+## Arrancar la vista previa local
 
 Con Node.js `^20.19.0` o `>=22.12.0`, desde `frontend/`:
 
 ```bash
 npm ci
 npm run typecheck
+npm run dev
 ```
 
-`package.json`, `package-lock.json` y `tsconfig.json` están versionados. Esta rama instala y verifica sus módulos, pero no contiene todavía el punto de entrada ni el comando de build de la aplicación completa. Para hacer el despliegue se deben ensamblar las rutas con el trabajo de acceso del otro frontend developer.
+Abre `http://localhost:5173/preview.html`. El archivo principal de esta vista es `src/features/preview.tsx`, cargado desde `preview.html`; Vite lo sirve con el script `dev` de `package.json`. Pega un JWT de prueba emitido por el backend o por el flujo de acceso del compañero. Se usa solo en memoria y se descarta al recargar o pulsar «Quitar token». El backend valida el token en cada solicitud.
+
+`package.json`, `package-lock.json` y `tsconfig.json` están versionados. Esta vista previa usa rutas con `#` para no ocupar las rutas reales de la app del equipo. El despliegue final requiere integrar estos módulos con el punto de entrada y el acceso del otro frontend developer; esta rama no incluye un comando de build de producción.
 
 ## Integración con el frontend de acceso
 
@@ -77,4 +81,4 @@ El anfitrión debe renderizar estas rutas solo con una sesión válida. `handleU
 
 El código del reto se conserva en `sessionStorage` por `userId` e identificador de reto. Los casos de prueba ocultos quedan en el backend. El frontend muestra `APPROVED`, `FAILED`, `SYNTAX_ERROR` y `EVALUATION_UNAVAILABLE`; una falla técnica permite reintentar sin borrar el código. Una respuesta HTTP 401 invoca `onUnauthorized` para que el módulo de acceso gestione la sesión vencida.
 
-Esta rama entrega módulos para integrar en la aplicación del equipo. El arranque de Vite y el despliegue se configuran en la rama que ensamble el frontend completo.
+Esta rama entrega módulos para integrar en la aplicación del equipo. El punto de entrada y el build de producción se configuran en la rama que ensamble el frontend completo.
