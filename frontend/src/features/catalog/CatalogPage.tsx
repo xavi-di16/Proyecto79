@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, ApiError } from '../../services/api'
+import { api, ApiError, type PracticeApi } from '../../services/api'
 import type { Challenge, PracticeAccess } from '../../types/api'
 import '../practice.css'
 
-type CatalogPageProps = Pick<PracticeAccess, 'token' | 'onUnauthorized'>
+type CatalogPageProps = Pick<PracticeAccess, 'token' | 'onUnauthorized'> & { client?: PracticeApi }
 
-export default function CatalogPage({ token, onUnauthorized }: CatalogPageProps) {
+export default function CatalogPage({ token, onUnauthorized, client = api }: CatalogPageProps) {
   const unauthorizedRef = useRef(onUnauthorized)
   useEffect(() => { unauthorizedRef.current = onUnauthorized }, [onUnauthorized])
   const [items, setItems] = useState<Challenge[]>([])
@@ -16,11 +16,11 @@ export default function CatalogPage({ token, onUnauthorized }: CatalogPageProps)
   useEffect(() => {
     let active = true
     setError(''); setLoading(true)
-    api.challenges(token).then(data => { if (active) setItems(data) })
+    client.challenges(token).then(data => { if (active) setItems(data) })
       .catch(cause => { if (!active) return; if (cause instanceof ApiError && cause.status === 401) unauthorizedRef.current(); else setError(cause instanceof Error ? cause.message : 'No se pudo cargar el catálogo.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [token, reloadKey])
+  }, [token, client, reloadKey])
   return <main className="a79-practice page-container">
     <h1>Elegí un desafío</h1><p className="subtle">Practicá con retos originales inspirados en empresas.</p>
     {loading && <p role="status">Cargando retos…</p>}

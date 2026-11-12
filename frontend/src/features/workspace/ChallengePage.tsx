@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { type OnMount } from '@monaco-editor/react'
 import { Link, useParams } from 'react-router-dom'
-import { api, ApiError } from '../../services/api'
+import { api, ApiError, type PracticeApi } from '../../services/api'
 import type { Challenge, Evaluation, PracticeAccess } from '../../types/api'
 import '../practice.css'
 import './monaco'
 
-export default function ChallengePage({ token, userId, onUnauthorized }: PracticeAccess) {
+export default function ChallengePage({ token, userId, onUnauthorized, client = api }: PracticeAccess & { client?: PracticeApi }) {
   const { id } = useParams()
   const unauthorizedRef = useRef(onUnauthorized)
   useEffect(() => { unauthorizedRef.current = onUnauthorized }, [onUnauthorized])
@@ -24,27 +24,27 @@ export default function ChallengePage({ token, userId, onUnauthorized }: Practic
     if (!id) return
     let active = true
     setChallenge(null); setEvaluation(null); setError(''); setLoading(true)
-    api.challenge(id, token).then(data => { if (active) {
+    client.challenge(id, token).then(data => { if (active) {
       setChallenge(data)
       setCode(sessionStorage.getItem(`anchor79.draft.${userId}.${id}`) ?? data.codigoInicial ?? '')
     } })
       .catch(cause => { if (!active) return; if (cause instanceof ApiError && cause.status === 401) unauthorizedRef.current(); else setError(cause instanceof Error ? cause.message : 'No se pudo cargar el reto.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [id, token, userId, reloadKey])
+  }, [id, token, userId, client, reloadKey])
   async function execute() {
     if (!id || running.current) return
     if (!code.trim()) { setError('Escribí una solución antes de ejecutar.'); return }
     if (code.length > 20000) { setError('La solución supera el límite de 20.000 caracteres.'); return }
     running.current = true; setBusy(true); setError(''); setEvaluation(null)
-    try { setEvaluation(await api.execute(id, code, token)) }
+    try { setEvaluation(await client.execute(id, code, token)) }
     catch (cause) {
       if (cause instanceof ApiError && cause.status === 401) unauthorizedRef.current()
       else setEvaluation({ status: 'EVALUATION_UNAVAILABLE', estadoVisible: 'No se pudo evaluar', passedCases: 0, totalCases: 0, sampleOutput: null, failedCase: null, errorDetail: cause instanceof Error ? cause.message : 'Intenta nuevamente.' })
     } finally { running.current = false; setBusy(false) }
   }
   const onEditorMount: OnMount = (_, monaco) => {
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({ noSemanticValidation: true })
+    monaco.languages.typescript?.typescriptDefaults?.setDiagnosticsOptions({ noSemanticValidation: true })
     monaco.editor.defineTheme('anchor79-light', {
       base: 'vs', inherit: false,
       rules: [{ token: '', foreground: '172B42' }, { token: 'comment', foreground: '64748B' }, { token: 'keyword', foreground: '245B80' }, { token: 'string', foreground: '22A879' }, { token: 'number', foreground: '245B80' }, { token: 'type.identifier', foreground: '245B80' }],

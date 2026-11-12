@@ -32,6 +32,7 @@ La captura de Figma muestra el catálogo, la consigna, el editor y la respuesta 
 | `src/features/workspace/ChallengePage.tsx` | Muestra consigna, editor, ejecución y cuatro estados de evaluación. |
 | `src/features/workspace/monaco.ts` | Carga Monaco y los workers locales de TypeScript. |
 | `src/features/preview.tsx` | Punto de entrada de la vista previa local, sin registro ni login. |
+| `src/features/demoApi.ts` | Datos públicos del primer reto y resultados simulados, solo para la vista previa. |
 | `src/features/practice.css` | Estilos limitados al contenedor `.a79-practice`, con la paleta acordada y modo oscuro según el sistema. |
 | `src/services/api.ts` | Cliente HTTP de los tres endpoints de retos. |
 | `src/types/api.ts` | Contratos de retos, evaluación y propiedades de integración. |
@@ -47,7 +48,9 @@ npm run lint
 npm run dev
 ```
 
-Abre `http://localhost:5173/preview.html`. El archivo principal de esta vista es `src/features/preview.tsx`, cargado desde `preview.html`; Vite lo sirve con el script `dev` de `package.json`. Pega un JWT de prueba emitido por el backend o por el flujo de acceso del compañero. Se usa solo en memoria y se descarta al recargar o pulsar «Quitar token». El backend valida el token en cada solicitud.
+Abre `http://localhost:5173/preview.html` y pulsa **Explorar demo sin cuenta**. Podrás abrir el reto `meli-envio`, escribir código y ver los cuatro estados del resultado. En la barra superior eliges el estado que quieres simular antes de pulsar **Ejecutar solución**. La demo **no ejecuta ni evalúa el código**; el aviso permanece visible durante el recorrido.
+
+El archivo principal de esta vista es `src/features/preview.tsx`, cargado desde `preview.html`; Vite lo sirve con el script `dev` de `package.json`. Para usar la API real, pega un JWT de prueba emitido por el backend o por el flujo de acceso del compañero en la pantalla inicial. Se conserva solo en memoria y se descarta al recargar o pulsar «Quitar token». El backend valida ese token en cada solicitud.
 
 Para comprobar el paquete que genera Vite:
 
@@ -56,7 +59,7 @@ npm run build
 npm run preview
 ```
 
-La salida de esta rama es `dist/preview.html`, una vista técnica que pide un JWT ya emitido. Usa rutas con `#` para no ocupar las rutas reales de la app del equipo. El despliegue final requiere integrar estos módulos con el punto de entrada y el acceso del otro frontend developer; el build de esta rama por sí solo no representa el producto completo.
+La salida de esta rama es `dist/preview.html`, una vista técnica con demo sin cuenta y una opción para conectar la API con JWT. Usa rutas con `#` para no ocupar las rutas reales de la app del equipo. El despliegue final requiere integrar estos módulos con el punto de entrada y el acceso del otro frontend developer; el build de esta rama por sí solo no representa el producto completo.
 
 ## Integración con el frontend de acceso
 
