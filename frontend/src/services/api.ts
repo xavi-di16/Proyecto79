@@ -1,4 +1,4 @@
-import type { Challenge, Evaluation, Session, User } from '../types/api'
+import type { Challenge, Evaluation } from '../types/api'
 
 const base = (import.meta.env.VITE_API_URL || 'https://proyecto79-1.onrender.com/api').replace(/\/$/, '')
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message) } }
@@ -18,22 +18,7 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
   }
   return body as T
 }
-function session(payload: { token: string; user: User & { name?: string } }): Session {
-  if (!payload?.token || !payload?.user?.id) throw new ApiError('Respuesta de acceso incompleta.', 0)
-  return { token: payload.token, user: {
-    id: payload.user.id, nombre: payload.user.nombre || payload.user.name || '', email: payload.user.email,
-  } }
-}
 export const api = {
-  async register(nombre: string, email: string, password: string) {
-    return session(await request<{ token: string; user: User }>('/auth/register', {
-      method: 'POST', body: JSON.stringify({ nombre, email, password }),
-    }))
-  },
-  async login(email: string, password: string) {
-    return session(await request<{ token: string; user: User }>('/auth/login', {
-      method: 'POST', body: JSON.stringify({ email, password }) }))
-  },
   async challenges(token: string) { return (await request<{ data: Challenge[] }>('/retos', {}, token)).data },
   async challenge(id: string, token: string) {
     return (await request<{ data: Challenge }>(`/retos/detalle/${encodeURIComponent(id)}`, {}, token)).data

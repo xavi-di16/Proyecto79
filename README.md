@@ -11,9 +11,9 @@ Plataforma web MVP diseñada para que estudiantes de desarrollo practiquen retos
 | Entorno | URL Pública | Estado |
 | :--- | :--- | :--- |
 | **Frontend (Vercel)** | `https://proyecto-xenry.vercel.app` *(Actualizar)* | 🟡 En configuración |
-| **Backend API (Render)** | `https://proyecto79-1.onrender.com/api` | 🟢 Disponible |
-| **Healthcheck** | `https://proyecto79-1.onrender.com/api/health` | 🟢 Disponible |
-| **Colección Postman** | [`/docs/postman/proyecto79.postman_collection.json`](./docs/postman/proyecto79.postman_collection.json) | 📄 Incluida en repo |
+| **Backend API (Render)** | `https://proyecto-xenry-api.onrender.com/api` *(Actualizar)* | 🟡 En configuración |
+| **Healthcheck** | `https://proyecto-xenry-api.onrender.com/api/health` | 🟡 En configuración |
+| **Colección Postman** | [`/docs/postman/xenry.postman_collection.json`](./docs/postman/xenry.postman_collection.json) | 📄 Incluida en repo |
 
 ---
 
@@ -32,10 +32,8 @@ Plataforma web MVP diseñada para que estudiantes de desarrollo practiquen retos
 ### Frontend (`/frontend`)
 * **Framework:** React + TypeScript (Vite)
 * **Editor de Código:** `@monaco-editor/react` (configurado para TypeScript)
-* **Estilos:** CSS adaptable con la paleta Anchor79, modo oscuro según el sistema y navegación por teclado
+* **Estilos:** Antigravity / CSS adaptable (Diseño *Desktop-first* con apilado responsivo en móvil y navegación por teclado)
 * **Hosting:** Vercel
-* **Instrucciones de esta entrega:** [frontend/README.md](./frontend/README.md)
-* **Wireflows de onboarding y primer reto:** [ver capturas y recorrido](./frontend/README.md#wireflows-del-recorrido-entregado)
 
 ### Backend (`/backend`)
 * **Runtime & Framework:** Node.js + Express con TypeScript
@@ -81,14 +79,14 @@ proyecto-xenry/
 ## ⚙️ Configuración e Instalación Local
 
 ### 1. Prerrequisitos
-* **Node.js** `^20.19.0` o `>=22.12.0` y **npm** para el frontend
+* **Node.js** $\ge 18.x$ y **npm**
 * Credenciales de servicio de **Firebase** (Service Account JSON o variables de entorno)
 * API Key de **Judge0** (vía RapidAPI o instancia configurada)
 
 ### 2. Clonar el repositorio
 ```bash
-git clone https://github.com/xavi-di16/Proyecto79.git
-cd Proyecto79
+git clone https://github.com/TU-USUARIO/proyecto-xenry.git
+cd proyecto-xenry
 ```
 
 ### 3. Configurar y levantar el Backend
@@ -98,7 +96,7 @@ cp .env.example .env
 # Completar las variables en .env
 npm install
 npm run seed    # Carga los retos semilla de MeLi, Globant y Workana en Firestore
-npm run dev     # Levanta el servidor en http://localhost:3000
+npm run dev     # Levanta el servidor en http://localhost:4000
 ```
 
 **Variables de entorno del Backend (`backend/.env.example`):**
@@ -118,13 +116,14 @@ JUDGE0_API_HOST=judge0-ce.p.rapidapi.com
 En otra terminal:
 ```bash
 cd frontend
-npm ci
+cp .env.example .env
+npm install
 npm run dev     # Levanta el cliente en http://localhost:5173
 ```
 
-El cliente usa por defecto la API desplegada. Para apuntar a un backend local, definir en `frontend/.env.local`:
+**Variables de entorno del Frontend (`frontend/.env.example`):**
 ```env
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:4000/api
 ```
 
 ---
@@ -134,7 +133,7 @@ VITE_API_URL=http://localhost:3000/api
 | Método | Endpoint | Auth | Descripción |
 | :--- | :--- | :---: | :--- |
 | `GET` | `/api/health` | No | Verifica estado del servidor en Render. |
-| `POST` | `/api/auth/register` | No | Crea cuenta de estudiante (`nombre`, `email`, `password`) y retorna JWT. |
+| `POST` | `/api/auth/register` | No | Crea cuenta de estudiante (`email`, `password`) y retorna JWT. |
 | `POST` | `/api/auth/login` | No | Inicia sesión y retorna `{ token, user }`. |
 | `GET` | `/api/challenges` | Bearer JWT | Lista empresas (`MeLi`, `Globant`, `Workana`) y sus retos activos. |
 | `GET` | `/api/challenges/:id` | Bearer JWT | Obtiene consigna, ejemplo público y `starterCode` (oculta casos privados). |

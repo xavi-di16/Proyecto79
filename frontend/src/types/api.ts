@@ -1,5 +1,9 @@
-export interface User { id: string; nombre: string; email: string }
-export interface Session { token: string; user: User }
+export interface PracticeAccess {
+  token: string
+  userId: string
+  onUnauthorized: () => void
+}
+
 export interface Challenge {
   id: string; empresa: string; titulo: string; notaPractica: string;
   descripcion: string; formatoEntrada: string; formatoSalida: string;

@@ -1,101 +1,69 @@
-# Anchor79 — frontend P0
+# Anchor79 — catálogo y primer reto
 
-Implementa registro, inicio/cierre de sesión, catálogo y resolución del primer reto con React, TypeScript y Monaco. El backend actual también publica los retos de Globant y Workana, por lo que el catálogo los muestra sin añadir flujos distintos.
+Esta rama aporta el recorrido **posterior al acceso**: catálogo de retos, apertura de `meli-envio`, edición de una solución TypeScript y resultado de evaluación. El registro, el login, la sesión JWT, el encabezado y las rutas protegidas pertenecen al otro frontend developer. Estos módulos reciben la sesión como propiedades y no implementan formularios de acceso.
 
-## Ejecutar
-
-Requiere Node.js `^20.19.0` o `>=22.12.0` y npm. Desde `frontend/`:
-
-```bash
-npm ci
-npm run dev
-```
-
-Abrir `http://localhost:5173`. La app usa por defecto la API publicada en Render (`https://proyecto79-1.onrender.com/api`), así que no requiere configurar variables para esta demo. Para apuntar al backend local, crear `frontend/.env.local` con `VITE_API_URL=http://localhost:3000/api` (o el puerto real de `backend/index.ts`). `.env.example` documenta el valor de producción. Render puede tardar en responder tras un período de inactividad.
-
-```bash
-npm run build
-npm audit --audit-level=moderate
-```
-
-## Wireflows del recorrido entregado
-
-El recorrido implementado va de registro o login al catálogo y luego al primer reto. El usuario escribe código, lo envía al backend y recibe uno de cuatro resultados. Los errores de acceso permiten corregir los datos; una sesión vencida vuelve al login. Un fallo de evaluación permite corregir o reintentar sin perder el borrador.
+## Wireflow implementado
 
 ```mermaid
 flowchart LR
-  R["Registro: nombre, correo y contraseña"] -->|Cuenta creada| C["Catálogo /retos"]
-  L["Login: correo y contraseña"] -->|Acceso correcto| C
-  R -->|Datos inválidos| R
-  L -->|Credenciales incorrectas| L
-  C -->|Abrir meli-envio| W["Consigna y editor /retos/meli-envio"]
-  W -->|Ejecutar solución| E["Evaluando"]
-  E --> A["Aprobado"]
-  E --> F["Falló"]
-  E --> S["Error de sintaxis"]
-  E --> N["No se pudo evaluar"]
-  F -->|Corregir código| W
-  S -->|Corregir código| W
-  N -->|Reintentar| E
-  C -->|Sesión vencida| L
-  W -->|Sesión vencida| L
-  C -->|Salir| L
-  W -->|Salir| L
+  A[Acceso y sesión del otro frontend developer] --> C[Catálogo /retos]
+  C -->|Abrir meli-envio| R[Consigna y editor /retos/meli-envio]
+  R -->|Ejecutar solución| E[Evaluación]
+  E --> OK[Aprobado]
+  E --> FAIL[Falló]
+  E --> SYNTAX[Error de sintaxis]
+  E --> UNAVAILABLE[No se pudo evaluar]
+  FAIL -->|Corregir| R
+  SYNTAX -->|Corregir| R
+  UNAVAILABLE -->|Reintentar| E
+  C -->|HTTP 401| A
+  R -->|HTTP 401| A
 ```
 
-Las siguientes son las **capturas de wireframes aportadas por Miguel**. Haz clic en cada imagen para verla a tamaño completo. Los bocetos muestran el modo claro; la aplicación también usa modo oscuro según el sistema.
+La captura de Figma muestra el catálogo, la consigna, el editor y la respuesta de evaluación. Utiliza “Operaciones de pedidos” como ejemplo visual; el primer reto real del backend es **“Umbral de Envío Gratis”** (`meli-envio`). El texto y el código inicial llegan desde la API.
 
-### 1. Acceso en escritorio
+[![Wireflow de catálogo y primer reto](../docs/wireflows/04-catalogo-reto.png)](../docs/wireflows/04-catalogo-reto.png)
 
-Login, registro y error de credenciales. Corresponde a `/login` y `/registro`.
+## Archivos de esta contribución
 
-[![Wireflow de login, registro y error de credenciales en escritorio](../docs/wireflows/01-acceso-desktop.png)](../docs/wireflows/01-acceso-desktop.png)
+| Ruta | Responsabilidad |
+| --- | --- |
+| `src/features/catalog/CatalogPage.tsx` | Carga el catálogo y enlaza con cada reto. |
+| `src/features/workspace/ChallengePage.tsx` | Muestra consigna, editor, ejecución y cuatro estados de evaluación. |
+| `src/features/workspace/monaco.ts` | Carga Monaco y los workers locales de TypeScript. |
+| `src/features/practice.css` | Estilos limitados al contenedor `.a79-practice`, con la paleta acordada y modo oscuro según el sistema. |
+| `src/services/api.ts` | Cliente HTTP de los tres endpoints de retos. |
+| `src/types/api.ts` | Contratos de retos, evaluación y propiedades de integración. |
 
-### 2. Estados de acceso
+## Integración con el frontend de acceso
 
-Error de validación en registro, envío del formulario y aviso de sesión vencida. En el código, la sesión vencida también se activa ante una respuesta 401 de la API.
+Los componentes requieren React, React Router, TypeScript, `@monaco-editor/react` y `monaco-editor`. `monaco.ts` usa el manejo de workers de Vite (`?worker`). El proyecto anfitrión instala estas dependencias y define `VITE_API_URL` si la API no está en `https://proyecto79-1.onrender.com/api`.
 
-[![Wireflow de errores, envío y sesión vencida](../docs/wireflows/02-estados-acceso-desktop.png)](../docs/wireflows/02-estados-acceso-desktop.png)
+En las rutas protegidas del frontend anfitrión, montar:
 
-### 3. Acceso móvil
+```tsx
+<Route path="/retos" element={
+  <CatalogPage token={session.token} onUnauthorized={handleUnauthorized} />
+} />
+<Route path="/retos/:id" element={
+  <ChallengePage
+    token={session.token}
+    userId={session.user.id}
+    onUnauthorized={handleUnauthorized}
+  />
+} />
+```
 
-Los formularios se apilan en pantalla estrecha y mantienen las mismas acciones que en escritorio.
+El anfitrión debe renderizar estas rutas solo con una sesión válida. `handleUnauthorized` limpia la sesión y redirige al acceso que implemente el compañero. El encabezado global también lo renderiza el anfitrión. Los enlaces internos de esta entrega usan `/retos` y `/retos/:id`; no contienen rutas de registro ni login.
 
-[![Wireflow móvil de login y registro](../docs/wireflows/03-acceso-mobile.png)](../docs/wireflows/03-acceso-mobile.png)
-
-### 4. Catálogo y primer reto
-
-El catálogo lleva a la consigna, al editor y al resultado de evaluación. Corresponde a `/retos` y `/retos/meli-envio`.
-
-[![Wireflow de catálogo, consigna, editor y resultado](../docs/wireflows/04-catalogo-reto.png)](../docs/wireflows/04-catalogo-reto.png)
-
-**Diferencias entre boceto y código:** el registro implementado incluye `nombre`, acordado después de dibujar el wireframe. La cuarta captura usa “Operaciones de pedidos” como ejemplo visual; el primer reto real que entrega el backend es “Umbral de Envío Gratis” (`meli-envio`). La consigna, el ejemplo y el código inicial se cargan desde la API.
-
-## Flujo y organización
-
-- `src/features/auth`: formularios de registro/login, sesión JWT, expiración y cierre de sesión.
-- `src/features/catalog`: catálogo autenticado de retos reales de la API.
-- `src/features/workspace`: consigna, Monaco TypeScript, ejecución y cuatro estados de evaluación.
-- `src/components`: encabezado compartido.
-- `src/services`: cliente HTTP y mensajes de error.
-- `src/types`: contrato de datos con el backend.
-
-El código del reto se guarda en `sessionStorage` por usuario y reto. Sigue disponible tras un error o reintento y desaparece al cerrar la sesión del navegador. El JWT se guarda en `localStorage` hasta que el usuario salga o expire a las 24 horas definidas por el backend. Una respuesta 401 fuerza el regreso a login con aviso de sesión vencida.
-
-## Contrato utilizado
+## API y comportamiento
 
 | Acción | Endpoint | Datos |
 | --- | --- | --- |
-| Registro | `POST /api/auth/register` | `nombre`, `email`, `password` |
-| Login | `POST /api/auth/login` | `email`, `password` |
 | Catálogo | `GET /api/retos` | JWT |
 | Detalle | `GET /api/retos/detalle/:id` | JWT |
 | Evaluar | `POST /api/retos/ejecutar` | JWT, `challengeId`, `language: "typescript"`, `code` |
 
-El primer reto semilla es `meli-envio`, “Umbral de Envío Gratis”. El backend recibe un programa TypeScript completo que lee stdin y escribe stdout; el código inicial de la API ya incluye esa lectura. La evaluación puede devolver `APPROVED`, `FAILED`, `SYNTAX_ERROR` o `EVALUATION_UNAVAILABLE`. Los casos ocultos y sus salidas no se exponen en el frontend.
+El código del reto se conserva en `sessionStorage` por `userId` e identificador de reto. Los casos de prueba ocultos quedan en el backend. El frontend muestra `APPROVED`, `FAILED`, `SYNTAX_ERROR` y `EVALUATION_UNAVAILABLE`; una falla técnica permite reintentar sin borrar el código. Una respuesta HTTP 401 invoca `onUnauthorized` para que el módulo de acceso gestione la sesión vencida.
 
-## Decisiones y límite de esta entrega
-
-La sección R3 del PRD antiguo dice JavaScript, pero los retos semilla, la documentación del repositorio y el ejecutor actual usan TypeScript. Este frontend sigue el contrato implementado de TypeScript. El modo claro usa el diseño adjunto; el oscuro sigue `prefers-color-scheme`. Todos los colores visibles se derivan de la paleta acordada.
-
-No incluye SSO, perfiles, historial de ejecuciones, ranking, otros flujos de producto ni despliegue de Vercel. Para confirmar el flujo completo en producción hará falta una cuenta de prueba y que Judge0 esté operativo en el backend.
+Esta rama entrega módulos para integrar en la aplicación del equipo. El arranque de Vite y el despliegue se configuran en la rama que ensamble el frontend completo.

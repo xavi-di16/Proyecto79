@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { type OnMount } from '@monaco-editor/react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import AppHeader from '../../components/AppHeader'
+import { Link, useParams } from 'react-router-dom'
 import { api, ApiError } from '../../services/api'
-import type { Challenge, Evaluation } from '../../types/api'
-import { useAuth } from '../auth/AuthContext'
+import type { Challenge, Evaluation, PracticeAccess } from '../../types/api'
+import '../practice.css'
 import './monaco'
 
-export default function ChallengePage() {
+export default function ChallengePage({ token, userId, onUnauthorized }: PracticeAccess) {
   const { id } = useParams()
-  const { session, expire } = useAuth()
-  const navigate = useNavigate()
+  const unauthorizedRef = useRef(onUnauthorized)
+  useEffect(() => { unauthorizedRef.current = onUnauthorized }, [onUnauthorized])
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [code, setCode] = useState('')
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null)
@@ -22,25 +21,25 @@ export default function ChallengePage() {
   const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   useEffect(() => { const media = matchMedia('(prefers-color-scheme: dark)'); const update = () => setDark(media.matches); media.addEventListener('change', update); return () => media.removeEventListener('change', update) }, [])
   useEffect(() => {
-    if (!session || !id) return
+    if (!id) return
     let active = true
     setChallenge(null); setEvaluation(null); setError(''); setLoading(true)
-    api.challenge(id, session.token).then(data => { if (active) {
+    api.challenge(id, token).then(data => { if (active) {
       setChallenge(data)
-      setCode(sessionStorage.getItem(`anchor79.draft.${session.user.id}.${id}`) ?? data.codigoInicial ?? '')
+      setCode(sessionStorage.getItem(`anchor79.draft.${userId}.${id}`) ?? data.codigoInicial ?? '')
     } })
-      .catch(cause => { if (!active) return; if (cause instanceof ApiError && cause.status === 401) { expire(); navigate('/login', { replace: true }) } else setError(cause instanceof Error ? cause.message : 'No se pudo cargar el reto.') })
+      .catch(cause => { if (!active) return; if (cause instanceof ApiError && cause.status === 401) unauthorizedRef.current(); else setError(cause instanceof Error ? cause.message : 'No se pudo cargar el reto.') })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [id, session, expire, navigate, reloadKey])
+  }, [id, token, userId, reloadKey])
   async function execute() {
-    if (!id || !session || running.current) return
+    if (!id || running.current) return
     if (!code.trim()) { setError('Escribí una solución antes de ejecutar.'); return }
     if (code.length > 20000) { setError('La solución supera el límite de 20.000 caracteres.'); return }
     running.current = true; setBusy(true); setError(''); setEvaluation(null)
-    try { setEvaluation(await api.execute(id, code, session.token)) }
+    try { setEvaluation(await api.execute(id, code, token)) }
     catch (cause) {
-      if (cause instanceof ApiError && cause.status === 401) { expire(); navigate('/login', { replace: true }) }
+      if (cause instanceof ApiError && cause.status === 401) unauthorizedRef.current()
       else setEvaluation({ status: 'EVALUATION_UNAVAILABLE', estadoVisible: 'No se pudo evaluar', passedCases: 0, totalCases: 0, sampleOutput: null, failedCase: null, errorDetail: cause instanceof Error ? cause.message : 'Intenta nuevamente.' })
     } finally { running.current = false; setBusy(false) }
   }
@@ -62,9 +61,9 @@ export default function ChallengePage() {
     const next = value ?? ''
     setCode(next)
     setEvaluation(null)
-    if (session && id) sessionStorage.setItem(`anchor79.draft.${session.user.id}.${id}`, next)
+    if (id) sessionStorage.setItem(`anchor79.draft.${userId}.${id}`, next)
   }
-  return <><AppHeader /><main className="page-container workspace-page">
+  return <main className="a79-practice page-container workspace-page">
     <Link className="back-link" to="/retos">← Volver al catálogo</Link>
     {loading && <p role="status">Cargando reto…</p>}
     {error && !challenge && <div className="load-error"><p className="notice error" role="alert">{error}</p><button type="button" className="button primary" onClick={() => setReloadKey(value => value + 1)}>Reintentar</button></div>}
@@ -93,5 +92,5 @@ export default function ChallengePage() {
         </section>
       </div>
     </>}
-  </main></>
+  </main>
 }
