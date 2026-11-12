@@ -36,7 +36,6 @@ function Preview() {
 
   function resetSession() { setSession(null) }
 
-  if (!import.meta.env.DEV) return <main className="a79-preview"><p>Esta vista previa solo está disponible en desarrollo.</p></main>
   if (!session) return <main className="a79-preview">
     <h1>Vista previa de catálogo y primer reto</h1>
     <p>Para probar las pantallas, pega un JWT emitido por el backend o por el acceso desarrollado por tu compañero. Esta vista no registra usuarios ni inicia sesión.</p>

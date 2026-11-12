@@ -43,12 +43,20 @@ Con Node.js `^20.19.0` o `>=22.12.0`, desde `frontend/`:
 ```bash
 npm ci
 npm run typecheck
+npm run lint
 npm run dev
 ```
 
 Abre `http://localhost:5173/preview.html`. El archivo principal de esta vista es `src/features/preview.tsx`, cargado desde `preview.html`; Vite lo sirve con el script `dev` de `package.json`. Pega un JWT de prueba emitido por el backend o por el flujo de acceso del compañero. Se usa solo en memoria y se descarta al recargar o pulsar «Quitar token». El backend valida el token en cada solicitud.
 
-`package.json`, `package-lock.json` y `tsconfig.json` están versionados. Esta vista previa usa rutas con `#` para no ocupar las rutas reales de la app del equipo. El despliegue final requiere integrar estos módulos con el punto de entrada y el acceso del otro frontend developer; esta rama no incluye un comando de build de producción.
+Para comprobar el paquete que genera Vite:
+
+```bash
+npm run build
+npm run preview
+```
+
+La salida de esta rama es `dist/preview.html`, una vista técnica que pide un JWT ya emitido. Usa rutas con `#` para no ocupar las rutas reales de la app del equipo. El despliegue final requiere integrar estos módulos con el punto de entrada y el acceso del otro frontend developer; el build de esta rama por sí solo no representa el producto completo.
 
 ## Integración con el frontend de acceso
 
