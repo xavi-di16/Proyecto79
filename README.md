@@ -35,6 +35,7 @@ Plataforma web MVP diseñada para que estudiantes de desarrollo practiquen retos
 * **Estilos:** CSS adaptable con la paleta Anchor79, modo oscuro según el sistema y navegación por teclado
 * **Hosting:** Vercel
 * **Instrucciones de esta entrega:** [frontend/README.md](./frontend/README.md)
+* **Wireflows de onboarding y primer reto:** [ver capturas y recorrido](./frontend/README.md#wireflows-del-recorrido-entregado)
 
 ### Backend (`/backend`)
 * **Runtime & Framework:** Node.js + Express con TypeScript

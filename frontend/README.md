@@ -18,6 +18,59 @@ npm run build
 npm audit --audit-level=moderate
 ```
 
+## Wireflows del recorrido entregado
+
+El recorrido implementado va de registro o login al catálogo y luego al primer reto. El usuario escribe código, lo envía al backend y recibe uno de cuatro resultados. Los errores de acceso permiten corregir los datos; una sesión vencida vuelve al login. Un fallo de evaluación permite corregir o reintentar sin perder el borrador.
+
+```mermaid
+flowchart LR
+  R["Registro: nombre, correo y contraseña"] -->|Cuenta creada| C["Catálogo /retos"]
+  L["Login: correo y contraseña"] -->|Acceso correcto| C
+  R -->|Datos inválidos| R
+  L -->|Credenciales incorrectas| L
+  C -->|Abrir meli-envio| W["Consigna y editor /retos/meli-envio"]
+  W -->|Ejecutar solución| E["Evaluando"]
+  E --> A["Aprobado"]
+  E --> F["Falló"]
+  E --> S["Error de sintaxis"]
+  E --> N["No se pudo evaluar"]
+  F -->|Corregir código| W
+  S -->|Corregir código| W
+  N -->|Reintentar| E
+  C -->|Sesión vencida| L
+  W -->|Sesión vencida| L
+  C -->|Salir| L
+  W -->|Salir| L
+```
+
+Las siguientes son las **capturas de wireframes aportadas por Miguel**. Haz clic en cada imagen para verla a tamaño completo. Los bocetos muestran el modo claro; la aplicación también usa modo oscuro según el sistema.
+
+### 1. Acceso en escritorio
+
+Login, registro y error de credenciales. Corresponde a `/login` y `/registro`.
+
+[![Wireflow de login, registro y error de credenciales en escritorio](../docs/wireflows/01-acceso-desktop.png)](../docs/wireflows/01-acceso-desktop.png)
+
+### 2. Estados de acceso
+
+Error de validación en registro, envío del formulario y aviso de sesión vencida. En el código, la sesión vencida también se activa ante una respuesta 401 de la API.
+
+[![Wireflow de errores, envío y sesión vencida](../docs/wireflows/02-estados-acceso-desktop.png)](../docs/wireflows/02-estados-acceso-desktop.png)
+
+### 3. Acceso móvil
+
+Los formularios se apilan en pantalla estrecha y mantienen las mismas acciones que en escritorio.
+
+[![Wireflow móvil de login y registro](../docs/wireflows/03-acceso-mobile.png)](../docs/wireflows/03-acceso-mobile.png)
+
+### 4. Catálogo y primer reto
+
+El catálogo lleva a la consigna, al editor y al resultado de evaluación. Corresponde a `/retos` y `/retos/meli-envio`.
+
+[![Wireflow de catálogo, consigna, editor y resultado](../docs/wireflows/04-catalogo-reto.png)](../docs/wireflows/04-catalogo-reto.png)
+
+**Diferencias entre boceto y código:** el registro implementado incluye `nombre`, acordado después de dibujar el wireframe. La cuarta captura usa “Operaciones de pedidos” como ejemplo visual; el primer reto real que entrega el backend es “Umbral de Envío Gratis” (`meli-envio`). La consigna, el ejemplo y el código inicial se cargan desde la API.
+
 ## Flujo y organización
 
 - `src/features/auth`: formularios de registro/login, sesión JWT, expiración y cierre de sesión.
